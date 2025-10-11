@@ -9,6 +9,9 @@ import authRoutes from '~/routes/authRoutes'
 // admin
 import adminRoutes from './routes/adminRoutes'
 
+// pt
+import ptPackageRoutes from './routes/ptPackageRoutes' 
+
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 const morgan = require('morgan')
@@ -29,6 +32,7 @@ const START_SERVER = () => {
   // user router
   app.use('/api/auth', authRoutes)
   app.use('/api/admin', adminRoutes )
+  app.use('/api/pt', ptPackageRoutes )
 
   app.use(errorHandlingMiddleware)
 

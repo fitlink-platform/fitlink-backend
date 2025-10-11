@@ -1,22 +1,71 @@
 // models/PTProfile.js
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 const ptProfileSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: true },
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    unique: true, 
+    required: true 
+  },
+  
+  // ✅ THÊM MỚI: Ảnh bìa (banner)
+  coverImage: {
+    type: String,
+    default: ''
+  },
+  
   bio: String,
   specialties: [String],
-  certificates: [{ name: String, issuer: String, year: Number, url: String }],
+  
+  // ✅ THÊM MỚI: Số năm kinh nghiệm
+  yearsExperience: {
+    type: Number,
+    min: 0,
+    max: 50
+  },
+  
+  certificates: [{ 
+    name: String, 
+    issuer: String, 
+    year: Number, 
+    url: String 
+  }],
+  
   location: {
     city: String,
     district: String,
     address: String,
-    coords: { type: { type: String, enum: ['Point'], default: 'Point' }, coordinates: [Number] }
+    coords: { 
+      type: { type: String, enum: ['Point'], default: 'Point' }, 
+      coordinates: [Number] 
+    }
   },
-  verified: { type: Boolean, default: false },
-  ratingAvg: { type: Number, default: 0 },
-  ratingCount: { type: Number, default: 0 },
-}, { timestamps: true });
+  
+  // ✅ THÊM MỚI: Có nhận học viên mới không
+  availableForNewClients: {
+    type: Boolean,
+    default: true
+  },
+  
+  verified: { 
+    type: Boolean, 
+    default: false 
+  },
+  ratingAvg: { 
+    type: Number, 
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  ratingCount: { 
+    type: Number, 
+    default: 0 
+  }
+}, { timestamps: true })
 
-ptProfileSchema.index({ 'location.coords': '2dsphere' });
+// ✅ INDEXES
+ptProfileSchema.index({ 'location.coords': '2dsphere' })
+ptProfileSchema.index({ verified: 1, availableForNewClients: 1 })
 
-export default mongoose.model('PTProfile', ptProfileSchema);
+export default mongoose.model('PTProfile', ptProfileSchema)

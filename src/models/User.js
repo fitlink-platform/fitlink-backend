@@ -81,9 +81,19 @@ const userSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },      // ✅ Bật virtuals
+    toObject: { virtuals: true }
   }
 )
+
+// ✅ THÊM VIRTUAL này
+userSchema.virtual('ptProfile', {
+  ref: 'PTProfile',           // Model muốn nối
+  localField: '_id',          // Field trong User
+  foreignField: 'user',       // Field trong PTProfile
+  justOne: true               // Chỉ 1 PTProfile cho 1 User
+})
 
 
 const User = mongoose.model('User', userSchema)

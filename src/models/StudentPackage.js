@@ -1,20 +1,44 @@
 // models/StudentPackage.js
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 const studentPackageSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  pt: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  package: { type: mongoose.Schema.Types.ObjectId, ref: 'Package' },
-  transaction: { type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' },
+  student: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
+  pt: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
+  package: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Package' 
+  },
+  transaction: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Transaction' 
+  },
 
   startDate: Date,
   endDate: Date,
   totalSessions: Number,
   remainingSessions: Number,
-  status: { type: String, enum: ['active', 'completed', 'expired', 'paused'], default: 'active' },
+  status: { 
+    type: String, 
+    enum: ['active', 'completed', 'expired', 'paused'], 
+    default: 'active' 
+  },
 
-  isExternal: { type: Boolean, default: false }, // học viên ngoài app
-  createdByPT: { type: Boolean, default: false },
+  isExternal: { 
+    type: Boolean, 
+    default: false 
+  },
+  createdByPT: { 
+    type: Boolean, 
+    default: false 
+  },
 
   baselineMetric: {
     heightCm: Number,
@@ -26,6 +50,11 @@ const studentPackageSchema = new mongoose.Schema({
     goal: { type: String, enum: ['lose', 'maintain', 'gain'] }
   },
   baselineMetricAt: Date
-}, { timestamps: true });
+}, { timestamps: true })
 
-export default mongoose.model('StudentPackage', studentPackageSchema);
+// ✅ INDEXES
+studentPackageSchema.index({ pt: 1, status: 1 })
+studentPackageSchema.index({ student: 1, status: 1 })
+studentPackageSchema.index({ endDate: 1 })
+
+export default mongoose.model('StudentPackage', studentPackageSchema)
