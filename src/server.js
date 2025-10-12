@@ -24,7 +24,7 @@ const START_SERVER = () => {
   app.use(express.json())
   app.use(morgan('dev'))
   app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: env.CLIENT_URL,
     credentials: true
   }))
   app.use(cookieParser())

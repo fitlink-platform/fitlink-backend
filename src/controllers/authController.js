@@ -235,7 +235,7 @@ const login = async (req, res) => {
 
   res.cookie('token', accessToken, {
     httpOnly: true,
-    secure: false, // nếu dùng HTTPS thì để true
+    secure: env.IS_SERCURE_COOKIE, // nếu dùng HTTPS thì để true
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 1 ngày
   })
@@ -246,7 +246,7 @@ const logout = (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
     sameSite: 'lax',
-    secure: false // nếu dùng HTTPS thì để true
+    secure: env.IS_SERCURE_COOKIE // nếu dùng HTTPS thì để true
   })
 
   res.status(200).json({ message: 'Logged out successfully' })
