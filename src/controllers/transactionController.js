@@ -1,5 +1,3 @@
-// controllers/transactionController.js (FINAL FIXED - Dùng 'payos' để qua Validation)
-
 import Transaction from '../models/Transaction.js';
 import StudentPackage from '../models/StudentPackage.js'; 
 import Package from '../models/Package.js'; 
@@ -8,7 +6,7 @@ import mongoose from 'mongoose';
 
 // >> HÀM TRUY VẤN PACKAGE THỰC TẾ <<
 const getPackageDetails = async (packageId) => {
-    // ... (Logic giữ nguyên)
+    // Logic: Lấy thông tin session và thời hạn từ Package
     const pkg = await Package.findById(packageId).select('totalSessions durationDays');
     if (!pkg) {
         throw new Error(`Package with ID ${packageId} not found.`);
@@ -17,54 +15,6 @@ const getPackageDetails = async (packageId) => {
         sessions: pkg.totalSessions,
         durationDays: pkg.durationDays
     };
-};
-
-/**
- * POST /api/transactions/initiate
- * Tạo bản ghi giao dịch và hoàn tất ngay lập tức.
- */
-export const initiateInternalTransaction = async (req, res) => {
-    const { studentId, ptId, packageId, amount, isPaid = true } = req.body;
-
-    if (!studentId || !ptId || !packageId || !amount) {
-        return res.status(400).json({ message: 'Thieu thong tin bat buoc: studentId, ptId, packageId, amount.' });
-    }
-
-    try {
-        // 1. Tạo bản ghi giao dịch
-        const transaction = await Transaction.create({
-            student: studentId,
-            pt: ptId,
-            package: packageId,
-            amount: amount,
-            
-            // 🔥 FIX CUỐI CÙNG: Phải dùng 'payos' để vượt qua Enum Validation trong Model
-            method: 'payos', 
-            
-            status: isPaid ? 'paid' : 'initiated', 
-        });
-
-        // 2. KÍCH HOẠT STUDENTPACKAGE NẾU THANH TOÁN THÀNH CÔNG
-        if (transaction.status === 'paid') {
-            await createStudentPackageFromTransaction(transaction);
-        }
-
-        console.log(`✅ Giao dich noi bo ID: ${transaction._id} da tao va hoan tat.`);
-        
-        // 3. Trả về trạng thái giao dịch
-        return res.status(200).json({
-            message: 'Giao dich noi bo duoc khoi tao va hoan tat thanh cong.',
-            transactionId: transaction._id,
-            status: transaction.status
-        });
-
-    } catch (error) {
-        console.error('Loi khoi tao giao dich noi bo:', error.message);
-        return res.status(500).json({ 
-            message: 'Khong the khoi tao giao dich noi bo.', 
-            error: error.message 
-        });
-    }
 };
 
 /**
@@ -98,9 +48,104 @@ const createStudentPackageFromTransaction = async (transaction) => {
     });
 };
 
+// ----------------------------------------------------------------------
+// >> API CHÍNH <<
+// ----------------------------------------------------------------------
+
+/**
+ * POST /api/transactions/initiate
+ * Tạo bản ghi giao dịch chờ. Xử lý logic 0 VND ngay lập tức.
+ */
+export const initiateTransaction = async (req, res) => {
+    // SỬ DỤNG 'price' theo yêu cầu
+    const { studentId, ptId, packageId, price } = req.body; 
+
+    // Kiểm tra validation cho các trường bắt buộc
+    if (!studentId || !ptId || !packageId || price === undefined || price === null) {
+        return res.status(400).json({ message: 'Thieu thong tin bat buoc: studentId, ptId, packageId, price.' });
+    }
+
+    try {
+        // 1. Tạo bản ghi giao dịch với status: 'initiated'
+        let transaction = await Transaction.create({
+            student: studentId,
+            pt: ptId,
+            package: packageId,
+            price: price, // Sử dụng trường price
+            status: 'initiated', // Mặc định là 'initiated'
+            method: 'payos', // Phương thức thanh toán giả định
+            amount: 1
+        });
+
+        // 2. LOGIC BÌNH THƯỜNG (cho gói > 0 VND)
+        console.log(`✅ Giao dich ID: ${transaction._id} da tao voi trang thai 'initiated', cho thanh toan.`);
+        return res.status(201).json({
+            message: 'Giao dich duoc khoi tao thanh cong. Dang cho thanh toan.',
+            transactionId: transaction._id,
+            status: transaction.status,
+            price: price,
+            // Thêm các thông tin cần thiết cho cổng thanh toán ở đây (ví dụ: checkoutUrl)
+        });
+
+    } catch (error) {
+        console.error('Loi khoi tao giao dich:', error.message);
+        return res.status(500).json({ 
+            message: 'Khong the khoi tao giao dich.', 
+            error: error.message 
+        });
+    }
+};
+
+/**
+ * POST /api/transactions/complete/:id
+ * CẬP NHẬT GIAO DỊCH sang status 'paid' và kích hoạt StudentPackage.
+ */
+export const completeTransaction = async (req, res) => {
+    const { id } = req.params; 
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Ma giao dich khong hop le.' });
+    }
+
+    try {
+        const transaction = await Transaction.findById(id);
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Khong tim thay giao dich.' });
+        }
+
+        if (transaction.status === 'paid') {
+            return res.status(200).json({ message: 'Giao dich da duoc thanh toan truoc do.', status: 'paid' });
+        }
+        
+        // 1. Cập nhật trạng thái giao dịch
+        transaction.status = 'paid';
+        // THÊM THÔNG TIN PAYMENT GATEWAY VÀO ĐÂY NẾU CÓ
+        await transaction.save();
+
+        // 2. KÍCH HOẠT STUDENTPACKAGE
+        await createStudentPackageFromTransaction(transaction);
+
+        console.log(`✅ Giao dich ID: ${transaction._id} da duoc cap nhat thanh 'paid' va StudentPackage da duoc tao.`);
+        
+        return res.status(200).json({
+            message: 'Thanh toan hoan tat thanh cong va goi tap da duoc kich hoat.',
+            transactionId: transaction._id,
+            status: transaction.status
+        });
+
+    } catch (error) {
+        console.error('Loi hoan tat giao dich:', error.message);
+        return res.status(500).json({ 
+            message: 'Loi trong buoc hoan tat giao dich hoac kich hoat goi tap.', 
+            error: error.message 
+        });
+    }
+};
 
 /**
  * GET /api/transactions/:id
+ * Lấy chi tiết giao dịch (dùng cho Frontend hiển thị xác nhận thanh toán).
  */
 export const getTransactionDetails = async (req, res) => {
     try {
@@ -111,9 +156,10 @@ export const getTransactionDetails = async (req, res) => {
         const transaction = await Transaction.findById(req.params.id)
             .populate('student', 'username email') 
             .populate('pt', 'username email') 
-            .populate('package', 'name price');   
+            .populate('package', 'name price'); // Populate trường price của package  
 
         if (!transaction) {
+            // Lỗi xảy ra nếu không tìm thấy bản ghi (404)
             return res.status(404).json({ message: 'Khong tim thay giao dich.' });
         }
 
