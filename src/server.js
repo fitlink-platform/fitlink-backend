@@ -6,6 +6,9 @@ import { connectDB } from '~/config/database'
 // router
 import authRoutes from '~/routes/authRoutes'
 
+// >>> FIX: Import Transaction Routes
+import transactionRoutes from '~/routes/transactionRoutes'
+
 // admin
 import adminRoutes from './routes/adminRoutes'
 
@@ -32,6 +35,9 @@ const START_SERVER = () => {
 
   // user router
   app.use('/api/auth', authRoutes)
+      // >>> FIX: Use Transaction Routes
+  app.use('/api/transactions', transactionRoutes)
+
   app.use('/api/admin', adminRoutes )
   app.use('/api/pt', ptPackageRoutes )
   app.use('/api/pt', ptProfileRoutes )
