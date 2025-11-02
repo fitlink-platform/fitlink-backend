@@ -307,7 +307,59 @@ const generateSchedule = async (req, res) => {
   }
 };
 
+// src/controllers/scheduleController.js
+const previewScheduleDraft = async (req, res) => {
+  try {
+    const { startDate, draft, carryForward, spreadWeekly } = req.body;
+    // draft gồm: totalSessions, sessionDurationMin, recurrence.daysOfWeek (0..6), supports (optional)
+
+    if (!draft?.totalSessions || !draft?.sessionDurationMin) {
+      return res.status(400).json({ success: false, message: 'Thiếu totalSessions / sessionDurationMin' });
+    }
+
+    // PT hiện tại (người tạo gói)
+    const pt = await PTProfile.findOne({ user: req.user?._id });
+    if (!pt) return res.status(400).json({ success: false, message: 'PTProfile not found' });
+
+    // "giả lập" một Package object từ draft
+    const pkgLike = {
+      _id: 'draft',
+      pt: req.user?._id,
+      totalSessions: Number(draft.totalSessions),
+      sessionDurationMin: Number(draft.sessionDurationMin),
+      recurrence: {
+        daysOfWeek: Array.isArray(draft?.recurrence?.daysOfWeek) ? draft.recurrence.daysOfWeek : []
+      },
+      supports: draft.supports || { atPtGym: true }
+    };
+
+    const baseDate = startDate ? new Date(startDate) : new Date();
+    baseDate.setHours(0,0,0,0);
+
+    // 1) build lịch thô
+    let slots = await buildPreviewSlots(pkgLike, pt, baseDate);
+
+    // 2) carry-forward (bật mặc định, có thể tắt bằng carryForward=false|0)
+    const shouldCarry = !(carryForward === false || carryForward === '0' || carryForward === 'false');
+    if (shouldCarry) {
+      slots = carryForwardPastOpenSlots(slots, {
+        now: new Date(),
+        spreadWeekly: spreadWeekly === true || spreadWeekly === '1' || spreadWeekly === 'true'
+      });
+    }
+
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache'); res.set('Expires', '0');
+    return res.status(200).json({ success: true, slots });
+  } catch (e) {
+    console.error('previewScheduleDraft error:', e);
+    return res.status(500).json({ success: false, message: 'Lỗi server', error: e.message });
+  }
+};
+
+
 export const scheduleController = {
   previewSchedule,
   generateSchedule,
+  previewScheduleDraft
 };
