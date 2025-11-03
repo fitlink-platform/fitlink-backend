@@ -45,6 +45,17 @@ const PTProfileSchema = new Schema(
     yearsExperience: { type: Number, min: 0, max: 50, default: 0, set: v => Math.trunc(v ?? 0) },
     certificates: [{ name: String, issuer: String, year: Number, url: String }],
 
+    workingHours: [{
+      // 1 = Monday … 7 = Sunday (hoặc 0..6 tuỳ bạn)
+      dayOfWeek: { type: Number, min: 1, max: 7, required: true },
+      intervals: [{
+        start: { type: String, required: true }, // "06:00"
+        end: { type: String, required: true }  // "11:00"
+      }] 
+    }],
+    // Thời gian nghỉ mặc định giữa 2 buổi (phút)
+    defaultBreakMin: { type: Number, default: 0, min: 0 },
+    
     // Mô tả khu vực hoạt động (text)
     areaNote: { type: String, default: '' },
 

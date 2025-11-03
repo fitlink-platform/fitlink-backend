@@ -68,3 +68,17 @@ export const updateStudentPackage = async (req, res) => {
 
   res.json(pkg);
 };
+// 🧩 Lấy tất cả PT (dành cho admin)
+export const getAllPTs = async (req, res) => {
+  try {
+    // Lấy danh sách user có role là 'pt' (Personal Trainer)
+    const pts = await User.find({ role: "pt" })
+      .lean()
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(pts);
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách PT:", error);
+    res.status(500).json({ message: "Lỗi server khi lấy danh sách PT" });
+  }
+};

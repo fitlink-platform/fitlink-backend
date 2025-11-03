@@ -2,6 +2,7 @@ import express from 'express'
 import { env } from '~/config/environment'
 import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
 import { connectDB } from '~/config/database'
+import searchRoutes from './routes/searchRoutes.js'
 
 // router
 import authRoutes from '~/routes/authRoutes'
@@ -46,6 +47,7 @@ const START_SERVER = () => {
   app.use('/api/pt', ptProfileRoutes )
   app.use('/api/pt', ptStudentRoutes)
   app.use('/api/pt', ptWalletRoues)
+  app.use('/api/search', searchRoutes)
 
   app.use(errorHandlingMiddleware)
 

@@ -24,6 +24,10 @@ const packageSchema = new Schema(
     // Giá mỗi buổi (VND, integer)
     price: { type: Number, default: 0, min: 0, max: 100_000_000 },
 
+    // Lịch lặp cho gói (nếu có)
+    recurrence: {
+          daysOfWeek: [[{ type: Number, min: 1, max: 7, required: true }]],
+    },
     // Quy mô gói
     totalSessions:      { type: Number, required: true, min: 1, max: 500 },
     sessionDurationMin: { type: Number, required: true, min: 15, max: 300 },
@@ -65,5 +69,39 @@ packageSchema.pre('validate', function (next) {
   if (typeof this.price === 'number') this.price = Math.round(this.price)
   next()
 })
+
+packageSchema.pre('validate', function (next) {
+  // clean strings/numbers sẵn có
+  if (typeof this.name === 'string') this.name = this.name.trim();
+  if (typeof this.description === 'string') this.description = this.description.trim();
+  if (typeof this.price === 'number') this.price = Math.round(this.price);
+
+  // normalize recurrence.daysOfWeek
+  const r = this.recurrence || {};
+  let arr = r.daysOfWeek;
+
+  // Nếu người dùng gửi [2,4,6] → chuyển thành [[2,4,6]]
+  if (Array.isArray(arr) && arr.length && typeof arr[0] === 'number') {
+    arr = [arr];
+  }
+
+  // Nếu không phải mảng → đặt rỗng
+  if (!Array.isArray(arr)) arr = [];
+
+  // Làm sạch từng pattern
+  arr = arr
+    .map(pat => {
+      if (!Array.isArray(pat)) return [];
+      const cleaned = pat
+        .map(Number)
+        .filter(d => Number.isInteger(d) && d >= 1 && d <= 7);
+      // unique + sort
+      return [...new Set(cleaned)].sort((a, b) => a - b);
+    })
+    .filter(pat => pat.length > 0); // bỏ rỗng
+
+  this.recurrence = { ...(this.recurrence || {}), daysOfWeek: arr };
+  next();
+});
 
 export default model('Package', packageSchema)
