@@ -1,7 +1,8 @@
-import express from "express";
-import { env } from "~/config/environment";
-import { errorHandlingMiddleware } from "~/middlewares/errorHandlingMiddleware";
-import { connectDB } from "~/config/database";
+import express from 'express'
+import { env } from '~/config/environment'
+import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
+import { connectDB } from '~/config/database'
+import searchRoutes from './routes/searchRoutes.js'
 
 // router
 import authRoutes from "~/routes/authRoutes";
@@ -46,6 +47,7 @@ const START_SERVER = () => {
   });
 
   // user router
+  app.use('/api/search', searchRoutes)
   app.use("/api/auth", authRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/pt", ptPackageRoutes);

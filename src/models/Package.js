@@ -105,5 +105,4 @@ packageSchema.pre('validate', function (next) {
   next();
 });
 
-
 export default model('Package', packageSchema)
