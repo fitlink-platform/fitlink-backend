@@ -4,10 +4,10 @@ const { Schema, model } = mongoose
 
 const TravelPricingSchema = new Schema(
   {
-    enabled:      { type: Boolean, default: false },   // bật định giá di chuyển ở cấp gói
-    freeRadiusKm: { type: Number, default: 6,  min: 0 },
-    maxTravelKm:  { type: Number, default: 20, min: 0 },
-    feePerKm:     { type: Number, default: 10000, min: 0 }
+    enabled: { type: Boolean, default: false },   // bật định giá di chuyển ở cấp gói
+    freeRadiusKm: { type: Number, default: 6, min: 0 },
+    maxTravelKm: { type: Number, default: 20, min: 0 },
+    feePerKm: { type: Number, default: 10000, min: 0 }
   },
   { _id: false }
 )
@@ -26,12 +26,13 @@ const packageSchema = new Schema(
 
     // Lịch lặp cho gói (nếu có)
     recurrence: {
-          daysOfWeek: [[{ type: Number, min: 1, max: 7, required: true }]],
+          daysOfWeek: [[{ type: Number, min: 0, max: 6, required: true }]],
     },
+
     // Quy mô gói
-    totalSessions:      { type: Number, required: true, min: 1, max: 500 },
+    totalSessions: { type: Number, required: true, min: 1, max: 500 },
     sessionDurationMin: { type: Number, required: true, min: 15, max: 300 },
-    durationDays:       { type: Number, required: true, min: 1, max: 3650 },
+    durationDays: { type: Number, required: true, min: 1, max: 3650 },
 
     // Trạng thái
     isActive: { type: Boolean, default: true },
@@ -41,8 +42,8 @@ const packageSchema = new Schema(
 
     // Gói áp dụng tại đâu (case 1/2/3)
     supports: {
-      atPtGym:    { type: Boolean, default: true },
-      atClient:   { type: Boolean, default: true },
+      atPtGym: { type: Boolean, default: true },
+      atClient: { type: Boolean, default: true },
       atOtherGym: { type: Boolean, default: true }
     },
 
@@ -94,7 +95,7 @@ packageSchema.pre('validate', function (next) {
       if (!Array.isArray(pat)) return [];
       const cleaned = pat
         .map(Number)
-        .filter(d => Number.isInteger(d) && d >= 1 && d <= 7);
+        .filter(d => Number.isInteger(d) && d >= 0 && d <= 6);
       // unique + sort
       return [...new Set(cleaned)].sort((a, b) => a - b);
     })
