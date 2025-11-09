@@ -1,7 +1,8 @@
-// src/socket/chatSocket.js
+// src/sockets/chatSocket.js
 import { Server } from "socket.io";
 import Chat from "../models/Chat.js";
 import Message from "../models/Message.js";
+import { createNotification } from "../services/notificationService.js";
 
 export const initChatSocket = (server) => {
   const io = new Server(server, {
@@ -14,7 +15,21 @@ export const initChatSocket = (server) => {
   io.on("connection", (socket) => {
     console.log("⚡ Client connected:", socket.id);
 
-    // Tham gia room (VD: "ptId-studentId")
+    // Nếu client có truyền userId qua query thì join luôn
+    const userId = socket.handshake?.query?.userId;
+    if (userId) {
+      socket.join(String(userId));
+      console.log(`👤 ${socket.id} joined user room ${userId} (query)`);
+    }
+
+    // Fallback: client sẽ emit 'registerUser' ngay sau khi connect
+    socket.on("registerUser", (uid) => {
+      if (!uid) return;
+      socket.join(String(uid));
+      console.log(`👤 ${socket.id} joined user room ${uid} (registerUser)`);
+    });
+
+    // Tham gia / rời room hội thoại
     socket.on("joinRoom", (roomId) => {
       if (!roomId) return;
       socket.join(roomId);
@@ -27,7 +42,7 @@ export const initChatSocket = (server) => {
       console.log(`🚪 ${socket.id} left room ${roomId}`);
     });
 
-    // Gửi tin nhắn realtime + lưu DB
+    // Gửi tin nhắn + tạo/emit notification
     socket.on("sendMessage", async (message) => {
       try {
         const { room, sender, text, attachments = [] } = message;
@@ -40,48 +55,49 @@ export const initChatSocket = (server) => {
         let chatDoc = await Chat.findOne({ participants: { $all: [id1, id2] } });
         if (!chatDoc) chatDoc = await Chat.create({ participants: [id1, id2] });
 
-        // Tạo tin nhắn mới
-        const newMsg = await Message.create({
-          chat: chatDoc._id,
-          sender,
-          text,
-          attachments,
-        });
-
-        // Cập nhật lastMessage của cuộc trò chuyện
+        const newMsg = await Message.create({ chat: chatDoc._id, sender, text, attachments });
         chatDoc.lastMessage = { sender, text, timestamp: new Date() };
         await chatDoc.save();
 
-        // Populate để trả về đầy đủ cho client
         const populatedMsg = await newMsg.populate("sender", "fullName avatar role");
+        const payload = { ...populatedMsg.toObject(), room };
 
-        // Chuẩn payload để frontend nhận
-        const payload = {
-          ...populatedMsg.toObject(),
-          room,
-        };
-
-        // Gửi đến tất cả trong room (bao gồm người gửi)
         io.to(room).emit("receiveMessage", payload);
+
+        const receiverId = String(sender) === String(id1) ? id2 : id1;
+        const noti = await createNotification({
+          user: receiverId,
+          type: "message",
+          title: "Tin nhắn mới",
+          message: text.slice(0, 120),
+          meta: { room, senderId: sender },
+        });
+
+        io.to(String(receiverId)).emit("notification", {
+          id: noti._id,
+          type: noti.type,
+          title: noti.title,
+          message: noti.message,
+          data: noti.meta,
+          createdAt: noti.createdAt,
+        });
+
         console.log("💬 Message sent + saved:", room);
       } catch (err) {
         console.error("❌ Socket sendMessage error:", err);
       }
     });
 
-    // Đang gõ
     socket.on("typing", (roomId) => {
       if (!roomId) return;
       socket.to(roomId).emit("userTyping", { roomId });
     });
 
-    // Dừng gõ
     socket.on("stopTyping", (roomId) => {
       if (!roomId) return;
       socket.to(roomId).emit("userStopTyping", { roomId });
     });
 
-    // Đánh dấu đã đọc
     socket.on("markAsRead", ({ roomId, userId }) => {
       if (!roomId) return;
       io.to(roomId).emit("messagesRead", { roomId, userId });

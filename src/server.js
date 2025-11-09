@@ -14,6 +14,7 @@ import ptApprovalRoutes from "./routes/ptApprovalRoutes.js";
 import ptRoutes from "./routes/ptRoutes";
 import ptWalletRoues from "./routes/ptWalletRoutes";
 import messageRoutes from "./routes/messageRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 // student
 import cookieParser from "cookie-parser";
@@ -23,6 +24,7 @@ import http from "http";
 
 // notification
 import notificationRoutes from "./routes/notificationRoutes.js";
+
 
 // 🆕 Thêm dòng này
 import { initChatSocket } from "./sockets/chatSocket.js";
@@ -58,6 +60,7 @@ const START_SERVER = () => {
   app.use("/api/notifications", notificationRoutes);
   app.use("/api/pt", ptApprovalRoutes);
   app.use("/api/messages", messageRoutes);
+  app.use("/api/ai", aiRoutes);
  
 
   app.use(errorHandlingMiddleware);
