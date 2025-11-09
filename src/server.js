@@ -18,6 +18,7 @@ import ptApprovalRoutes from "./routes/ptApprovalRoutes.js";
 import ptRoutes from "./routes/ptRoutes";
 import ptWalletRoues from "./routes/ptWalletRoutes";
 import scheduleRoutes from "~/routes/scheduleRoutes.js";
+import sessionRoutes from './routes/sessionRoutes.js'
 
 // student
 import cookieParser from "cookie-parser";
@@ -59,6 +60,7 @@ const START_SERVER = () => {
   app.use("/api/pt", ptRoutes);
   app.use("/api/pt", scheduleRoutes);
   app.use("/api/students", studentRoutes);
+  app.use('/api/sessions', sessionRoutes)
   app.use(errorHandlingMiddleware);
 
   const server = http.createServer(app);
