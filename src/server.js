@@ -18,6 +18,8 @@ import ptWalletRoues from "./routes/ptWalletRoutes";
 import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import scheduleRoutes from "~/routes/scheduleRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
+import studentCheckoutRoutes from "./routes/studentCheckoutRoutes.js";
 import sessionRoutes from './routes/sessionRoutes.js'
 
 // student
@@ -71,6 +73,8 @@ const START_SERVER = () => {
   app.use("/api/pt", ptRoutes);
   app.use("/api/pt", scheduleRoutes);
   app.use("/api/students", studentRoutes);
+  app.use("/api/booking", bookingRoutes);
+  app.use("/api/student", studentCheckoutRoutes);
   app.use('/api/sessions', sessionRoutes)
   app.use(errorHandlingMiddleware);
 
