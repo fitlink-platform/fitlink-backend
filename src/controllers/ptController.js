@@ -82,9 +82,15 @@ export const getMyStudents = async (req, res) => {
 
 // 🏷️ Lấy danh sách gói template của PT
 export const getMyPackages = async (req, res) => {
-  const ptId = req.user._id;
-  const list = await Package.find({ pt: ptId, isActive: true }).lean();
-  res.json(list);
+  try {
+    const ptId = req.user._id;
+    const list = await Package.find({ pt: ptId, isActive: true }).lean();
+
+    return res.json({ data: list });
+  } catch (err) {
+    console.error("getMyPackages error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 // ➕ Tạo gói cho học viên
