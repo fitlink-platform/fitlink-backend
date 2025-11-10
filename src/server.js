@@ -18,7 +18,8 @@ import ptWalletRoues from "./routes/ptWalletRoutes";
 import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import scheduleRoutes from "~/routes/scheduleRoutes.js";
-import sessionRoutes from './routes/sessionRoutes.js'
+import sessionRoutes from './routes/sessionRoutes.js';
+import feedbackRoutes from "./routes/feedbackRoutes.js";
 
 // student
 import cookieParser from "cookie-parser";
@@ -71,7 +72,8 @@ const START_SERVER = () => {
   app.use("/api/pt", ptRoutes);
   app.use("/api/pt", scheduleRoutes);
   app.use("/api/students", studentRoutes);
-  app.use('/api/sessions', sessionRoutes)
+  app.use('/api/sessions', sessionRoutes);
+  app.use("/api/feedbacks", feedbackRoutes);
   app.use(errorHandlingMiddleware);
 
   // 🆕 Thêm dòng này sau khi app config xong
