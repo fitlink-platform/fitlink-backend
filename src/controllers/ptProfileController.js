@@ -10,12 +10,12 @@ export function sanitizePTProfile(body = {}) {
 
   // ----- flat fields -----
   if (typeof body.coverImage !== 'undefined') payload.coverImage = String(body.coverImage || '').trim()
-  if (typeof body.bio !== 'undefined')        payload.bio = String(body.bio || '').trim()
+  if (typeof body.bio !== 'undefined') payload.bio = String(body.bio || '').trim()
   if (typeof body.videoIntroUrl !== 'undefined')
     payload.videoIntroUrl = String(body.videoIntroUrl || '').trim()
   if (typeof body.availableForNewClients !== 'undefined')
     payload.availableForNewClients = !!body.availableForNewClients
-  if (typeof body.areaNote !== 'undefined')   payload.areaNote = String(body.areaNote || '').trim()
+  if (typeof body.areaNote !== 'undefined') payload.areaNote = String(body.areaNote || '').trim()
 
   // specialties
   if (typeof body.specialties !== 'undefined') {
@@ -48,7 +48,7 @@ export function sanitizePTProfile(body = {}) {
   if (typeof body.primaryGym !== 'undefined') {
     const pg = body.primaryGym || {}
     const out = {}
-    if (typeof pg.name !== 'undefined')    out.name = String(pg.name || '').trim()
+    if (typeof pg.name !== 'undefined') out.name = String(pg.name || '').trim()
     if (typeof pg.address !== 'undefined') out.address = String(pg.address || '').trim()
 
     if (typeof pg.location !== 'undefined') {
@@ -73,8 +73,8 @@ export function sanitizePTProfile(body = {}) {
   // deliveryModes
   if (typeof body.deliveryModes !== 'undefined') {
     payload.deliveryModes = {
-      atPtGym:    !!body.deliveryModes?.atPtGym,
-      atClient:   !!body.deliveryModes?.atClient,
+      atPtGym: !!body.deliveryModes?.atPtGym,
+      atClient: !!body.deliveryModes?.atClient,
       atOtherGym: !!body.deliveryModes?.atOtherGym
     }
   }
@@ -82,12 +82,31 @@ export function sanitizePTProfile(body = {}) {
   // travelPolicy
   if (typeof body.travelPolicy !== 'undefined') {
     payload.travelPolicy = {
-      enabled:      !!body.travelPolicy?.enabled,
+      enabled: !!body.travelPolicy?.enabled,
       freeRadiusKm: Number(body.travelPolicy?.freeRadiusKm) || 0,
-      feePerKm:     Number(body.travelPolicy?.feePerKm) || 0,
-      maxTravelKm:  Number(body.travelPolicy?.maxTravelKm) || 0
+      feePerKm: Number(body.travelPolicy?.feePerKm) || 0,
+      maxTravelKm: Number(body.travelPolicy?.maxTravelKm) || 0
     }
   }
+
+  // workingHours
+  if (Array.isArray(body.workingHours)) {
+    const hhmm = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    payload.workingHours = body.workingHours
+      .map(d => ({
+        dayOfWeek: Number(d?.dayOfWeek),
+        intervals: Array.isArray(d?.intervals)
+          ? d.intervals
+            .map(i => ({
+              start: String(i?.start || '').trim(),
+              end: String(i?.end || '').trim()
+            }))
+            .filter(i => hhmm.test(i.start) && hhmm.test(i.end) && i.start < i.end)
+          : []
+      }))
+      .filter(d => Number.isFinite(d.dayOfWeek) && d.dayOfWeek >= 0 && d.dayOfWeek <= 6 && d.intervals.length > 0);
+  }
+
 
   // never allow system fields
   delete payload.verified
