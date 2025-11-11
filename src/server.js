@@ -12,15 +12,17 @@ import studentRoutes from "./routes/studentRoutes";
 import ptPackageRoutes from "./routes/ptPackageRoutes";
 import ptProfileRoutes from "./routes/ptProfileRoutes";
 import ptStudentRoutes from "./routes/ptStudentRoutes";
+import ptMaterialRoutes from "./routes/ptMaterialRoutes.js";
 import ptApprovalRoutes from "./routes/ptApprovalRoutes.js";
 import ptRoutes from "./routes/ptRoutes";
 import ptWalletRoues from "./routes/ptWalletRoutes";
 import messageRoutes from "./routes/messageRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import scheduleRoutes from "~/routes/scheduleRoutes.js";
+import sessionRoutes from './routes/sessionRoutes.js';
+import feedbackRoutes from "./routes/feedbackRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import studentCheckoutRoutes from "./routes/studentCheckoutRoutes.js";
-import sessionRoutes from './routes/sessionRoutes.js'
 
 // student
 import cookieParser from "cookie-parser";
@@ -57,6 +59,8 @@ const START_SERVER = () => {
   // user router
   app.use('/api/search', searchRoutes)
   app.use("/api/auth", authRoutes);
+  
+  app.use('/api/pt', ptMaterialRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/student", studentRoutes);
   app.use("/api/pt", ptRoutes);
@@ -68,14 +72,17 @@ const START_SERVER = () => {
   app.use("/api/pt", ptApprovalRoutes);
   app.use("/api/messages", messageRoutes);
   app.use("/api/ai", aiRoutes);
- 
 
-  app.use("/api/pt", ptRoutes);
+  // cho FE truy cập file đã upload
+  app.use("/uploads", express.static("uploads"));
+
   app.use("/api/pt", scheduleRoutes);
   app.use("/api/students", studentRoutes);
+  app.use('/api/sessions', sessionRoutes);
+  app.use("/api/feedbacks", feedbackRoutes);
   app.use("/api/booking", bookingRoutes);
   app.use("/api/student", studentCheckoutRoutes);
-  app.use('/api/sessions', sessionRoutes)
+  
   app.use(errorHandlingMiddleware);
 
   // 🆕 Thêm dòng này sau khi app config xong
