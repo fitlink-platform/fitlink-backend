@@ -1,4 +1,3 @@
-// src/controllers/feedbackController.js
 import Feedback from "../models/Feedback.js";
 import PTProfile from "../models/PTProfile.js";
 import Notification from "../models/Notification.js";
@@ -68,14 +67,20 @@ export const createFeedback = async (req, res) => {
  */
 export const getFeedbackByPT = async (req, res) => {
   try {
-    const feedbacks = await Feedback.find({ pt: req.params.ptId })
-      .populate("student", "fullName avatar")
+    const feedbacks = await Feedback.find({ pt: req.params.ptId }) // Lọc theo ptId
+      .populate("student", "fullName avatar name") // Lấy tên và ảnh đại diện của sinh viên
       .sort({ createdAt: -1 });
 
     const avgRating =
       feedbacks.length > 0
         ? feedbacks.reduce((s, f) => s + f.rating, 0) / feedbacks.length
         : 0;
+
+    // Kiểm tra và gán lại name nếu không có fullName
+    feedbacks.forEach(feedback => {
+      // Nếu không có fullName, dùng 'Anonymous'
+      feedback.student.name = feedback.student.name || feedback.student.fullName || 'Anonymous';
+    });
 
     res.json({
       success: true,
