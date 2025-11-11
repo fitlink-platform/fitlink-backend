@@ -6,7 +6,7 @@ const TravelPolicySchema = new Schema(
   {
     enabled: { type: Boolean, default: true },
     freeRadiusKm: { type: Number, default: 6, min: 0 },
-    maxTravelKm: { type: Number, default: 20, min: 0 },
+    maxTravelKm: { type: Number, default: 10, min: 0 },
     feePerKm: { type: Number, default: 10000, min: 0 }
   },
   { _id: false }
