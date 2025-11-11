@@ -23,6 +23,7 @@ import sessionRoutes from './routes/sessionRoutes.js';
 import feedbackRoutes from "./routes/feedbackRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import studentCheckoutRoutes from "./routes/studentCheckoutRoutes.js";
+import payoutRoutes from "./routes/payoutRoutes.js";
 
 // student
 import cookieParser from "cookie-parser";
@@ -82,6 +83,8 @@ const START_SERVER = () => {
   app.use("/api/feedbacks", feedbackRoutes);
   app.use("/api/booking", bookingRoutes);
   app.use("/api/student", studentCheckoutRoutes);
+
+  app.use("/api/payouts", payoutRoutes);
   
   app.use(errorHandlingMiddleware);
 

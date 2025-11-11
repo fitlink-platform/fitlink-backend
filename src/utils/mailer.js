@@ -41,9 +41,8 @@ export const sendAppointmentConfirmationEmail = async (to, appointmentInfo) => {
               <h3 style="color: #f97316;">🙋 Người đặt</h3>
               <p><strong>Tên:</strong> ${appointmentInfo.customerName}</p>
               <p><strong>Email:</strong> ${to}</p>
-              <p><strong>Điện thoại:</strong> ${
-                appointmentInfo.phone || "(chưa cung cấp)"
-              }</p>
+              <p><strong>Điện thoại:</strong> ${appointmentInfo.phone || "(chưa cung cấp)"
+      }</p>
             </div>
 
             <div style="flex: 1; min-width: 200px; border: 1px solid #eee; border-radius: 10px; padding: 16px;">
@@ -51,21 +50,19 @@ export const sendAppointmentConfirmationEmail = async (to, appointmentInfo) => {
               <p><strong>Tên:</strong> ${appointmentInfo.petName}</p>
               <p><strong>Loại:</strong> ${appointmentInfo.petType || "---"}</p>
               <p><strong>Tuổi:</strong> ${appointmentInfo.petAge || "---"}</p>
-              <p><strong>Cân nặng:</strong> ${
-                appointmentInfo.petWeight || "---"
-              }</p>
+              <p><strong>Cân nặng:</strong> ${appointmentInfo.petWeight || "---"
+      }</p>
             </div>
           </div>
 
-          ${
-            appointmentInfo.note
-              ? `
+          ${appointmentInfo.note
+        ? `
           <div style="margin-top: 20px; border: 1px solid #eee; border-radius: 10px; padding: 16px;">
             <h3 style="color: #f97316;">📝 Ghi chú</h3>
             <p>${appointmentInfo.note}</p>
           </div>`
-              : ""
-          }
+        : ""
+      }
 
           <p style="margin-top: 30px;">Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của <strong>Spa Pet</strong>! Chúng tôi rất mong được phục vụ bạn và thú cưng của bạn. ❤️</p>
 
@@ -178,8 +175,7 @@ export const sendNewPTRequestEmail = async (to, ptName, ptEmail) => {
     subject,
     `
     <p>PT <strong>${ptName}</strong> (<a href="mailto:${ptEmail}">${ptEmail}</a>) vừa gửi yêu cầu duyệt hồ sơ mới.</p>
-    <p>Vui lòng đăng nhập vào <a href="${
-      env.CLIENT_URL
+    <p>Vui lòng đăng nhập vào <a href="${env.CLIENT_URL
     }/admin" style="color:#0ea5e9;text-decoration:none;">Admin Dashboard</a> để xem chi tiết và xét duyệt.</p>
     <p style="margin-top:18px;font-size:13px;color:#64748b;">Thời gian gửi: ${new Date().toLocaleString(
       "vi-VN"
@@ -231,10 +227,47 @@ export const sendPTRejectedEmail = async (to, name, reason) => {
     `
     <p>Xin lỗi <strong>${name}</strong>, hồ sơ PT của bạn chưa được duyệt.</p>
     <p><strong>Lý do:</strong> ${reason || "Không rõ lý do"}</p>
-    <p>Bạn có thể truy cập <a href="${
-      env.CLIENT_URL
+    <p>Bạn có thể truy cập <a href="${env.CLIENT_URL
     }/pt/profile" style="color:#0ea5e9;text-decoration:none;">hồ sơ PT</a> để chỉnh sửa và gửi lại yêu cầu duyệt sau khi đã cập nhật thông tin cần thiết.</p>
     <p style="margin-top:16px;color:#94a3b8;font-size:13px;">Hệ thống sẽ thông báo cho bạn khi yêu cầu mới được gửi đi.</p>
+    `
+  );
+
+  await transporter.sendMail({
+    from: `"FitLink" <${env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  });
+};
+
+export const sendPTWithdrawCompletedEmail = async (
+  to,
+  ptName,
+  bankName,
+  accountNumber,
+  amount,
+) => {
+  const subject = "✅ Yêu cầu rút tiền của bạn đã được xử lý";
+
+  const html = baseTemplate(
+    subject,
+    `
+    <p>Chào <strong>${ptName}</strong>,</p>
+    <p>Yêu cầu rút tiền của bạn đã được xử lý thành công. Thông tin chi tiết:</p>
+
+    <ul style="line-height:1.7;">
+      <li><strong>Ngân hàng:</strong> ${bankName}</li>
+      <li><strong>Số tài khoản:</strong> ${accountNumber}</li>
+      <li><strong>Số tiền đã chuyển:</strong> ${amount.toLocaleString("vi-VN")} ₫</li>
+      <li><strong>Thời gian hoàn tất:</strong> ${new Date().toLocaleString("vi-VN")}</li>
+    </ul>
+
+    <p>Vui lòng kiểm tra tài khoản ngân hàng của bạn để xác nhận đã nhận được tiền.</p>
+
+    <p style="margin-top:16px;color:#94a3b8;font-size:13px;">
+      Cảm ơn bạn đã đồng hành cùng <strong>FitLink</strong> 💪
+    </p>
     `
   );
 
