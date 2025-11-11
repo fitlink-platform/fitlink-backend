@@ -26,6 +26,12 @@ import bookingRoutes from './routes/bookingRoutes.js'
 import studentCheckoutRoutes from './routes/studentCheckoutRoutes.js'
 import sessionRoutes from './routes/sessionRoutes.js'
 
+import ptMaterialRoutes from './routes/ptMaterialRoutes.js'
+
+import feedbackRoutes from './routes/feedbackRoutes.js'
+
+import payoutRoutes from './routes/payoutRoutes.js'
+
 // student
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -64,22 +70,29 @@ const START_SERVER = () => {
   app.use('/api/student', studentRoutes)
   app.use('/api/pt', ptRoutes)
   app.use('/api/pt', ptPackageRoutes)
-  app.use('/api/pt', ptProfileRoutes)
   app.use('/api/pt', ptStudentRoutes)
   app.use('/api/pt', ptWalletRoues)
   app.use('/api/notifications', notificationRoutes)
   app.use('/api/pt', ptApprovalRoutes)
   app.use('/api/messages', messageRoutes)
   app.use('/api/ai', aiRoutes)
-  app.use('/api/pt', ptRoutes)
   app.use('/api/pt', scheduleRoutes)
-  app.use('/api/students', studentRoutes)
   app.use('/api/booking', bookingRoutes)
   app.use('/api/student', studentCheckoutRoutes)
   app.use('/api/sessions', sessionRoutes)
-  app.use(errorHandlingMiddleware)
   app.use('/api/training-sessions', trainingSessionRoutes)
   app.use('/api/student-packages', studentPackageRoutes)
+
+  app.use('/api/pt', ptMaterialRoutes)
+  app.use('/api/pt', ptProfileRoutes)
+
+  // cho FE truy cập file đã upload
+  app.use('/uploads', express.static('uploads'))
+  app.use('/api/feedbacks', feedbackRoutes)
+
+  app.use('/api/payouts', payoutRoutes)
+
+  app.use(errorHandlingMiddleware)
 
   // 🆕 Thêm dòng này sau khi app config xong
   initChatSocket(server)
