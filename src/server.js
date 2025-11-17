@@ -47,7 +47,7 @@ import { initChatSocket } from './sockets/chatSocket.js'
 const START_SERVER = () => {
   const app = express()
   const server = http.createServer(app) // ✅ tạo HTTP server trước
-
+  app.set('trust proxy', 1) // nếu deploy lên Heroku hoặc Vercel thì mở dòng này
   app.use(express.json())
   app.use(morgan('dev'))
   app.use(
@@ -102,14 +102,14 @@ const START_SERVER = () => {
   })
 }
 
-;(async () => {
-  try {
-    console.log('1. Connecting to MongoDB Cloud Atlas')
-    await connectDB()
-    console.log('2. Connected to MongoDB Cloud Atlas')
-    START_SERVER()
-  } catch (error) {
-    console.error(error)
-    process.exit(0)
-  }
-})()
+  ; (async () => {
+    try {
+      console.log('1. Connecting to MongoDB Cloud Atlas')
+      await connectDB()
+      console.log('2. Connected to MongoDB Cloud Atlas')
+      START_SERVER()
+    } catch (error) {
+      console.error(error)
+      process.exit(0)
+    }
+  })()
