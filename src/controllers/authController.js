@@ -89,8 +89,8 @@ const loginWithGoogle = async (req, res) => {
     // Set cookie HttpOnly
     res.cookie('token', accessToken, {
       httpOnly: true,
-      secure: false, // true nếu deploy https
-      sameSite: 'lax',
+      secure: env.IS_SERCURE_COOKIE, // true nếu deploy https
+      sameSite: env.COOKIE_SAMESITE || 'lax',
       maxAge: 24 * 60 * 60 * 1000
     })
 
@@ -267,7 +267,7 @@ const login = async (req, res) => {
   res.cookie('token', accessToken, {
     httpOnly: true,
     secure: env.IS_SERCURE_COOKIE, // nếu dùng HTTPS thì để true
-    sameSite: 'lax',
+    sameSite: env.COOKIE_SAMESITE || 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 1 ngày
   })
   res.json({ message: 'Login successful' })
@@ -276,7 +276,7 @@ const login = async (req, res) => {
 const logout = (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: env.COOKIE_SAMESITE || 'lax',
     secure: env.IS_SERCURE_COOKIE // nếu dùng HTTPS thì để true
   })
 
