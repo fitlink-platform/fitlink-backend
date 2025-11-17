@@ -15,7 +15,7 @@ export const env = {
   EMAIL_USER: process.env.EMAIL_USER,
   EMAIL_PASS: process.env.EMAIL_PASS,
   IS_SERCURE_COOKIE: process.env.IS_SERCURE_COOKIE === 'true',
-  IS_SERCURE_COOKIE: process.env.COOKIE_SAMESITE || 'lax',
+  COOKIE_SAMESITE: process.env.COOKIE_SAMESITE || 'lax',
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
