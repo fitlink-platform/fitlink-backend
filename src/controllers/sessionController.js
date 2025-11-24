@@ -22,7 +22,7 @@ export const updateSessionStatus = async (req, res) => {
       return res.status(404).json({ message: 'Session not found.' })
     }
 
-    // ✅ Authorization check
+    // Authorization check
     const sessionPtId = session.pt?._id
       ? String(session.pt._id)
       : String(session.pt)
@@ -33,14 +33,14 @@ export const updateSessionStatus = async (req, res) => {
         .json({ message: 'You do not have permission to update this session.' })
     }
 
-    // ✅ Update session data
+    // Update session data
     if (status) session.status = status
     if (ptNote !== undefined) session.ptNote = ptNote
     if (attendance) session.attendance = attendance
     if (status === 'completed') session.completedAt = new Date()
 
     await session.save()
-    // 🆕 Emit realtime khi PT cập nhật buổi tập
+    // Emit realtime khi PT cập nhật buổi tập
     if (global.emitSessionUpdate) {
       global.emitSessionUpdate(session.student._id, {
         sessionId: session._id,
@@ -52,13 +52,13 @@ export const updateSessionStatus = async (req, res) => {
       })
     }
 
-    // ✅ Build notification message dynamically
+    // Build notification message dynamically
     let message = `The session "${session.title}" has been updated`
     if (status) message += `: ${status}`
     if (ptNote) message += `. Trainer's note: ${ptNote}`
     if (!message.endsWith('.')) message += '.'
 
-    // ✅ Save notification to database
+    // Save notification to database
     await Notification.create({
       user: session.student._id,
       type: 'session',
@@ -67,7 +67,7 @@ export const updateSessionStatus = async (req, res) => {
       meta: { sessionId: session._id, status, ptNote }
     })
 
-    // ✅ Send realtime notification via Socket.IO (if available)
+    // Send realtime notification via Socket.IO (if available)
     if (global.sendNotificationToUser) {
       global.sendNotificationToUser(session.student._id, {
         title: 'Session Update',
@@ -78,7 +78,7 @@ export const updateSessionStatus = async (req, res) => {
       })
     }
 
-    // ✅ If this was the final session in the package
+    // If this was the final session in the package
     if (status === 'completed') {
       const totalSessions = session.studentPackage?.totalSessions || 0
       const completedCount = await Session.countDocuments({
@@ -90,12 +90,12 @@ export const updateSessionStatus = async (req, res) => {
         session.studentPackage.status = 'completed'
         await session.studentPackage.save()
 
-        // 🟢 Tìm PTProfile theo user
+        // Tìm PTProfile theo user
         const ptProfile = await PTProfile.findOne({
           user: session.pt._id
         }).select('_id')
 
-        console.log('✅ DEBUG Feedback Meta:', {
+        console.log('DEBUG Feedback Meta:', {
           ptId: session.pt._id,
           ptProfileId: ptProfile?._id,
           studentPackageId: session.studentPackage._id
@@ -143,7 +143,7 @@ export const getSessionsByPT = async (req, res) => {
       )
       .sort({ startTime: 1 })
 
-    // ✅ Convert to frontend-friendly format
+    // Convert to frontend-friendly format
     const mapped = sessions.map((s) => {
       const start = new Date(s.startTime)
       const end = new Date(s.endTime)
@@ -172,6 +172,7 @@ export const getSessionsByPT = async (req, res) => {
     console.error('❌ getSessionsByPT error:', error)
     res.status(500).json({ message: 'Server error while loading sessions' })
   }
+<<<<<<< HEAD
 }
 
 
@@ -214,3 +215,6 @@ export const checkConflict = async (req, res) => {
       .json({ busy: false, message: "Lỗi server" });
   }
 };
+=======
+}
+>>>>>>> origin/dev
