@@ -10,7 +10,6 @@ router.get(
   authMiddleware.authenTokenCookie,
   getBlocksSimple
 );
-
 // FE đẩy full payload ở body
 router.post("/create-slots", createBookingAndGenerateSlots);
 

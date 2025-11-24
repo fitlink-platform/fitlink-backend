@@ -1,7 +1,9 @@
 // controllers/availabilitySimpleController.js
-import PTProfile from "~/models/PTProfile";
-import StudentPackage from "~/models/StudentPackage";
-import PackageModel from "~/models/Package";
+import PTProfile from "../models/PTProfile.js";
+import StudentPackage from "../models/StudentPackage.js";
+import PackageModel from "../models/Package.js";
+import Booking from "../models/Booking.js";
+import Notification from "../models/Notification.js";
 
 // --- tiny helpers ---
 const toMin = (s) => { const [h,m]=s.split(":").map(Number); return h*60+m; };

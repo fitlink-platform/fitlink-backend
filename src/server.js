@@ -13,6 +13,7 @@ import studentPackageRoutes from "./routes/studentPackageRoutes.js";
 import adminRoutes from "./routes/adminRoutes";
 import transactionRoutes from "./routes/transactionRoutes.js";
 // pt
+
 import ptPackageRoutes from "./routes/ptPackageRoutes";
 import ptProfileRoutes from "./routes/ptProfileRoutes";
 import ptStudentRoutes from "./routes/ptStudentRoutes";
@@ -25,7 +26,7 @@ import aiRoutes from "./routes/aiRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import studentCheckoutRoutes from "./routes/studentCheckoutRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
-
+import sessionRequestRoutes from "./routes/sessionRequestRoutes.js";
 import ptMaterialRoutes from "./routes/ptMaterialRoutes.js";
 
 import feedbackRoutes from "./routes/feedbackRoutes.js";
@@ -86,6 +87,8 @@ const START_SERVER = () => {
   app.use("/api/pt", ptMaterialRoutes);
   app.use("/api/pt", ptProfileRoutes);
   app.use("/api/student", studentMaterialRoutes);
+  app.use("/api/session", sessionRequestRoutes);
+
 
   // cho FE truy cập file đã upload
   app.use("/uploads", express.static("uploads"));

@@ -129,6 +129,8 @@ export const updateSessionStatus = async (req, res) => {
  * @route GET /api/sessions/pt
  * @access Private (PT)
  */
+// controllers/sessionController.js
+// controllers/sessionController.js
 export const getSessionsByPT = async (req, res) => {
   try {
     const ptId = req.user._id
@@ -171,3 +173,44 @@ export const getSessionsByPT = async (req, res) => {
     res.status(500).json({ message: 'Server error while loading sessions' })
   }
 }
+
+
+/**
+ * @desc Check PT’s schedule conflict
+ * @route POST /api/session/check-conflict
+ * @access Private (Student + PT)
+ */
+export const checkConflict = async (req, res) => {
+  try {
+    const { ptId, newStartTime, newEndTime, ignoreSessionId } = req.body;
+
+    // Validate input
+    if (!ptId || !newStartTime || !newEndTime) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ busy: false, message: "Thiếu dữ liệu kiểm tra" });
+    }
+
+    const start = new Date(newStartTime);
+    const end = new Date(newEndTime);
+
+    // Query trùng giờ
+    const conflict = await Session.findOne({
+      pt: ptId,
+      status: "scheduled", // chỉ kiểm tra buổi còn hiệu lực
+      _id: { $ne: ignoreSessionId }, // tránh so chính nó
+      startTime: { $lt: end }, // bắt đầu < giờ kết thúc mới
+      endTime: { $gt: start },  // kết thúc > giờ bắt đầu mới
+    });
+
+    return res.status(StatusCodes.OK).json({
+      busy: !!conflict,
+      conflictSession: conflict ? conflict._id : null,
+    });
+  } catch (err) {
+    console.error("❌ checkConflict error:", err);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ busy: false, message: "Lỗi server" });
+  }
+};

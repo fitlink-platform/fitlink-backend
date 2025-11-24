@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const { Schema, model } = mongoose
 
 const sessionSchema = new Schema({
+
   studentPackage: {
     type: Schema.Types.ObjectId,
     ref: 'StudentPackage',
@@ -25,7 +26,7 @@ const sessionSchema = new Schema({
   title: { type: String, default: 'Buổi tập' },
 
   startTime: { type: Date, required: true },
-  endTime:   { type: Date, required: true },
+  endTime: { type: Date, required: true },
 
   status: {
     type: String,
@@ -38,7 +39,28 @@ const sessionSchema = new Schema({
     enum: ['present', 'absent', 'pending'],
     default: 'pending'
   },
+  requestType: {
+    type: String,
+    enum: ["change", "absent", null],
+    default: null,
+  },
 
+  // (2) Trạng thái xử lý của yêu cầu
+  requestStatus: {
+    type: String,
+    enum: [
+      "change_request_pending",
+      "absent_request_pending",
+      null,
+    ],
+    default: null,
+  },
+
+  // (3) Lý do xin nghỉ / lý do đổi lịch (student)
+  requestReason: {
+    type: String,
+    default: null,
+  },
   ptNote: { type: String, default: '' },
   studentNote: { type: String, default: '' },
 
@@ -59,6 +81,6 @@ sessionSchema.pre('validate', function (next) {
 // sessionSchema.index({ pt: 1, startTime: 1 })                 // truy vấn lịch PT
 sessionSchema.index({ student: 1, startTime: 1 })            // lịch của học viên
 sessionSchema.index({ studentPackage: 1, status: 1 })        // theo dõi gói
-sessionSchema.index ({ slot: 1 }, {unique: true, sparse: true}) // tránh 2 session trùng giờ cho 1 PT
+sessionSchema.index({ slot: 1 }, { unique: true, sparse: true }) // tránh 2 session trùng giờ cho 1 PT
 
 export default model('Session', sessionSchema)

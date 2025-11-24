@@ -126,4 +126,5 @@ export const initChatSocket = (server) => {
     io.to(String(studentId)).emit('session_updated', payload)
     console.log(`📩 [Realtime] Sent session update to student ${studentId}`)
   }
+  
 }
